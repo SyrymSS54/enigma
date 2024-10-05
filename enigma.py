@@ -1,14 +1,15 @@
 from alphabet import alphabet
 from rotor import rotor
+from reverb_rotor import reverb_rotor
 
 class enigma:
     def __init__(self) -> None:
         self.input_text = self.func_input_text()
         self.normalize_text = self.normalize(self.input_text)
         self.cipher = self.func_input_cipher()
-        self.final_hash = []
-        self.final = ''
         self.rotor = rotor()
+        self.reverb_rotor = reverb_rotor()
+        self.final = []
 
     def func_input_text(self):
         return input('Ввод текста:')
@@ -20,43 +21,65 @@ class enigma:
         return list(map(int,list(input("Ввод шрифта:"))))
     
     def fetch(self):
+        print(self.normalize_text)
         for elem in self.normalize_text:
-            new_step_cipher = []
-
             if isinstance(elem,int):
-                for cipher in self.cipher:
-
-                    elem = self.rotor[cipher](elem)
+                for count in range(0,len(self.cipher)):
+                    rotor_count = self.cipher[count]
+                    func = self.rotor[rotor_count]
+                    print("{} -> {}".format(elem,func(elem)))
+                    elem = func(elem)
 
                     if elem > 25:
-                        new_step_cipher.append(cipher + 1)
+                        self.cipher[count] += 1
                     elif elem < 0:
-                        new_step_cipher.append(cipher - 1)
-                    else:
-                        new_step_cipher.append(cipher)
-
-                self.final_hash.append(elem)
-                    
-                self.cipher = new_step_cipher
-                print(elem, self.cipher)
-
+                        self.cipher[count] -= 1
+                print(elem,self.cipher)
+                self.final.append(elem)
             else:
-                self.final_hash.append(elem)
-                    
+                self.final.append(elem)
+
+    def reverb(self):
+        self.input_text = self.func_input_text()
+        self.normalize_text = self.normalize(self.input_text)
+        self.cipher = self.func_input_cipher()
+        
+        reverb = []
+        for elem in self.final:
+            if isinstance(elem,int):
+                for count in range(len(self.cipher)-1,-1,-1):
+                    rotor_count = self.cipher[count]
+                    func = self.reverb_rotor[rotor_count]
+                    print("{} -> {}".format(elem,func(elem)))
+
+                    if elem > 25:
+                        self.cipher[count] += 1
+                    elif elem < 0:
+                        self.cipher[count] -= 1
+                    elem = func(elem)
+
+                reverb.append(elem)
+            else:
+                reverb.append(elem)
+        return reverb
+
     def read(self):
-        alpha = alphabet()
-        for hash in self.final_hash:
-            if isinstance(hash,int):
-                self.final += alpha[hash]
-            elif isinstance(hash,str):
-                self.final += hash
+        al = alphabet()
+        value = ''
+        for elem in self.final:
+            if isinstance(elem,int):
+                value += al[elem]
+            else:
+                value += elem
+        return value
+
+
+
 
     
 if __name__ == "__main__":
     e = enigma()
-    print(e.normalize_text)
-    print(e.cipher)
     e.fetch()
-    print(e.final_hash)
-    e.read()
-    print(e.final)
+    print(e.read())
+    print(e.reverb())
+    print(e.normalize_text)

@@ -21,7 +21,7 @@ class reverb_rotor:
         return key / 3
     
     def __getitem__(self,key):
-        if key <= 5 and key >= 0:
+        if key <= 5:
             return self.func_list[key]
         elif key > 5:
             return self.__getitem__(key-6)
